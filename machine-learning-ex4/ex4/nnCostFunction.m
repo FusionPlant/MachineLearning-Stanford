@@ -62,23 +62,37 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+yy=zeros(length(y),num_labels);
+for j=1:num_labels
+    yy(:,j)=(y==j);
+end
 
+X=[ones(1,m); X'];
+a2=sigmoid(Theta1*X);
+a2=[ones(1,size(a2,2)); a2];
+a3=sigmoid(Theta2*a2);
+output=a3';
+elementwise_cost=-yy.*log(output)-(1-yy).*log(1-output);
+regularization_cost=sum(sum(Theta1(:,2:end).^2))+sum(sum(Theta2(:,2:end).^2));
+J=sum(elementwise_cost(:))/m+lambda/2/m*regularization_cost;
 
+% Backpropagation
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+for i=1:m
+    a1=X(:,i);
+    z2=Theta1*a1;
+    a2=[1; sigmoid(z2)];
+    z3=Theta2*a2;
+    a3=sigmoid(z3);
+    delta3=a3-yy(i,:)';
+    delta2=(Theta2'*delta3) .* a2 .* (1-a2);
+    Theta1_grad=Theta1_grad + delta2(2:end) * a1';
+    Theta2_grad=Theta2_grad + delta3 * a2';
+end
+Theta1(:,1)=0;
+Theta2(:,1)=0;
+Theta1_grad=(Theta1_grad+lambda*Theta1)/m;
+Theta2_grad=(Theta2_grad+lambda*Theta2)/m;
 
 % -------------------------------------------------------------
 
